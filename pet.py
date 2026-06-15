@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), "pet_state.json")
 
-DECAY_INTERVAL_SEC = 60
+DECAY_INTERVAL_SEC = 300  # decay every 5 min, not every minute
 NO_CODING_PENALTY_HOURS = 24
 
 
@@ -83,17 +83,29 @@ class PetApp:
         self.root.after(DECAY_INTERVAL_SEC * 1000, self.decay_tick)
 
     def decay_tick(self):
-        self.state["happiness"] = max(0, self.state["happiness"] - 1)
-        self.state["health"] = max(0, self.state["health"] - 1)
+        if self._claude_running():
+            # talking to Claude counts as thinking; no decay, small happiness bump
+            self.state["happiness"] = min(100, self.state["happiness"] + 1)
+            self.state["last_coding_time"] = time.time()
+        else:
+            self.state["happiness"] = max(0, self.state["happiness"] - 1)
+            self.state["health"] = max(0, self.state["health"] - 1)
 
-        last = datetime.fromtimestamp(self.state["last_coding_time"])
-        if datetime.now() - last > timedelta(hours=NO_CODING_PENALTY_HOURS):
-            self.state["happiness"] = max(0, self.state["happiness"] - 3)
-            self.state["health"] = max(0, self.state["health"] - 2)
+            last = datetime.fromtimestamp(self.state["last_coding_time"])
+            if datetime.now() - last > timedelta(hours=NO_CODING_PENALTY_HOURS):
+                self.state["happiness"] = max(0, self.state["happiness"] - 3)
+                self.state["health"] = max(0, self.state["health"] - 2)
 
         save_state(self.state)
         self.update_ui()
         self.schedule_decay()
+
+    def _claude_running(self):
+        try:
+            import psutil
+            return any("claude" in p.name().lower() for p in psutil.process_iter(["name"]))
+        except Exception:
+            return False
 
     def update_ui(self):
         h = self.state["health"]
