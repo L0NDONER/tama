@@ -1,22 +1,20 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 import json
 import os
 import time
 from datetime import datetime, timedelta
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), "pet_state.json")
+SPRITE_DIR = os.path.join(os.path.dirname(__file__), "sprites")
 
-DECAY_INTERVAL_SEC = 300  # decay every 5 min, not every minute
+DECAY_INTERVAL_SEC = 300
 NO_CODING_PENALTY_HOURS = 24
 
 
 def load_state():
     if not os.path.exists(STATE_FILE):
-        return {
-            "health": 80,
-            "happiness": 80,
-            "last_coding_time": time.time(),
-        }
+        return {"health": 80, "happiness": 80, "last_coding_time": time.time()}
     with open(STATE_FILE, "r") as f:
         return json.load(f)
 
@@ -34,17 +32,20 @@ class PetApp:
         self.root.resizable(False, False)
 
         self.state = load_state()
+        self._load_sprites()
 
-        self.pet_label = tk.Label(root, text="😺", font=("Arial", 40))
-        self.pet_label.pack()
+        self.pet_label = tk.Label(root, image=self.sprites["happy"], bg="#ebebeb")
+        self.pet_label.pack(pady=4)
 
-        self.status_label = tk.Label(root, text="", font=("Arial", 10), wraplength=200)
+        self.status_label = tk.Label(root, text="", font=("Arial", 10), wraplength=200, bg="#ebebeb")
         self.status_label.pack()
 
-        self.health_label = tk.Label(root, text="", font=("Arial", 10))
+        self.health_label = tk.Label(root, text="", font=("Arial", 10), bg="#ebebeb")
         self.health_label.pack()
 
-        btn_frame = tk.Frame(root)
+        root.configure(bg="#ebebeb")
+
+        btn_frame = tk.Frame(root, bg="#ebebeb")
         btn_frame.pack(pady=5)
 
         tk.Button(btn_frame, text="I coded!", command=self.mark_coded).grid(row=0, column=0, padx=2)
@@ -54,6 +55,16 @@ class PetApp:
 
         self.update_ui()
         self.schedule_decay()
+
+    def _load_sprites(self):
+        # generate sprites if missing
+        if not os.path.exists(os.path.join(SPRITE_DIR, "happy.png")):
+            import sprites as sp
+            sp.generate()
+        self.sprites = {}
+        for name in ("happy", "okay", "sad", "dead"):
+            img = Image.open(os.path.join(SPRITE_DIR, f"{name}.png"))
+            self.sprites[name] = ImageTk.PhotoImage(img)
 
     def mark_coded(self):
         self.state["last_coding_time"] = time.time()
@@ -84,7 +95,6 @@ class PetApp:
 
     def decay_tick(self):
         if self._claude_running():
-            # talking to Claude counts as thinking; no decay, small happiness bump
             self.state["happiness"] = min(100, self.state["happiness"] + 1)
             self.state["last_coding_time"] = time.time()
         else:
@@ -112,15 +122,15 @@ class PetApp:
         happy = self.state["happiness"]
 
         if h > 70 and happy > 70:
-            pet, status = "😺", "Happy and healthy! Keep coding."
+            sprite, status = "happy", "Happy and healthy! Keep coding."
         elif h > 40 and happy > 40:
-            pet, status = "😼", "Doing okay. Could use some clean code."
+            sprite, status = "okay",  "Doing okay. Could use some clean code."
         elif h > 20:
-            pet, status = "😿", "Not feeling great. Maybe close some tabs?"
+            sprite, status = "sad",   "Not feeling great. Maybe close some tabs?"
         else:
-            pet, status = "💀", "You've abandoned your pet (and your editor)."
+            sprite, status = "dead",  "You've abandoned your pet (and your editor)."
 
-        self.pet_label.config(text=pet)
+        self.pet_label.config(image=self.sprites[sprite])
         self.status_label.config(text=status)
         self.health_label.config(text=f"Health: {h} | Happiness: {happy}")
 
