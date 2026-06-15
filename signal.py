@@ -32,6 +32,7 @@ import subprocess
 STATE_FILE = os.path.join(os.path.dirname(__file__), "pet_state.json")
 
 FEED_TIERS = {
+    "lint_pass":   {"health":  5, "happiness":  8},
     "activity":    {"health":  1, "happiness":  1},
     "explore":     {"health":  2, "happiness":  2},
     "pip":         {"health":  3, "happiness":  5},

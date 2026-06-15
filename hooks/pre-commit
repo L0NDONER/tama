@@ -1,0 +1,11 @@
+#!/bin/sh
+# Run flake8 on staged Python files; feed or penalise the pet.
+staged=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$')
+[ -z "$staged" ] && exit 0
+
+if flake8 $staged; then
+    python3 /home/martin/tama/signal.py feed lint_pass 2>/dev/null || true
+else
+    python3 /home/martin/tama/signal.py lint_exit 1 2>/dev/null || true
+fi
+exit 0  # never block the commit
