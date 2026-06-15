@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=CodePet
+Comment=Terminal-driven tamagotchi
+Exec=python3 /home/martin/tama/pet.py
+Icon=/home/martin/tama/sprites/happy.png
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
