@@ -35,18 +35,18 @@ class PetApp:
         self._load_sprites()
 
         self.pet_label = tk.Label(root, image=self.sprites["happy"], bg="#ebebeb")
-        self.pet_label.pack(pady=4)
+        self.pet_label.pack(pady=2)
 
-        self.status_label = tk.Label(root, text="", font=("Arial", 10), wraplength=200, bg="#ebebeb")
+        self.status_label = tk.Label(root, text="", font=("Arial", 8), wraplength=150, bg="#ebebeb")
         self.status_label.pack()
 
-        self.health_label = tk.Label(root, text="", font=("Arial", 10), bg="#ebebeb")
+        self.health_label = tk.Label(root, text="", font=("Arial", 8), bg="#ebebeb")
         self.health_label.pack()
 
         root.configure(bg="#ebebeb")
 
         btn_frame = tk.Frame(root, bg="#ebebeb")
-        btn_frame.pack(pady=5)
+        btn_frame.pack(pady=2)
 
         tk.Button(btn_frame, text="I coded!", command=self.mark_coded).grid(row=0, column=0, padx=2)
         tk.Button(btn_frame, text="Too many tabs", command=self.too_many_tabs).grid(row=0, column=1, padx=2)

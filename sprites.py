@@ -3,7 +3,7 @@
 from PIL import Image
 import os
 
-SCALE = 4
+SCALE = 2
 OUT_DIR = os.path.join(os.path.dirname(__file__), "sprites")
 BG = (235, 235, 235)
 
