@@ -1,0 +1,3 @@
+#!/bin/sh
+# git hook: fires after a successful `git push`
+python3 /home/martin/tama/signal.py feed push

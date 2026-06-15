@@ -1,0 +1,2 @@
+#!/bin/sh
+python3 /home/martin/tama/signal.py feed commit
